@@ -8,7 +8,11 @@ variable "instance_type" {
   type        = string
 }
 
+/*
+# this probably should be defined at the environment level...
+# ...and, in "outputs"
 variable "subnet_id" {
   description = "Subnet ID for EC2 instances"
   type        = string
 }
+*/

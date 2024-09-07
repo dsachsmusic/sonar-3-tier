@@ -1,4 +1,4 @@
-/*Configure the load balancer to distribute traffic across multiple
+/*Module for the load balancer to distribute traffic across multiple
 AZs.
 */
 resource "aws_lb" "main" {

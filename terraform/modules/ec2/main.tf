@@ -1,7 +1,12 @@
-resource "aws_instance" "web" {
+/*
+This file/folder defines a module - it is intended to be called by a ...
+higher-level configuration, using the a "module" block...
+(module invokation)...It is not intended that Terraform apply be in...
+this folder
+*/
+resource "aws_instance" "websever" {
   ami           = var.ami
   instance_type = var.instance_type
-  subnet_id     = var.subnet_id
 }
 
 # Other EC2 resources...
