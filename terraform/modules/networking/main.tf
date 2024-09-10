@@ -38,3 +38,53 @@ resource "aws_route_table_association" "private" {
   subnet_id = var.private_subnet_id
   route_table_id = aws_route_table.private.id
 }
+
+
+# Security Group for ECS Instances
+resource "aws_security_group" "web_sg" {
+  name = "web-security-group"
+  description = "Allow HTTP and SSH"
+  vpc_id = var.vpc_id
+
+  ingress {
+    from_port = 80
+    to_port = 80
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+resource "aws_security_group" "ecs_instance_sg" {
+  name        = "ecs-instance-sg"
+  description = "Allow traffic to ECS instances"
+  vpc_id      = "your-vpc-id"
+
+  ingress {
+    description = "Allow HTTP traffic"
+    from_port   = 5000
+    to_port     = 5000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    description = "Allow all outbound traffic"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
