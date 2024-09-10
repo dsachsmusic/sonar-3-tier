@@ -33,10 +33,10 @@ resource "aws_autoscaling_group" "ecs_asg" {
 }
 
 #ECS services for running the tasks on EC2 instances.
-resource "aws_ecs_service" "inventory_service" {
-  name            = "inventory-service"
+resource "aws_ecs_service" "inventory" {
+  name            = "inventory"
   cluster         = aws_ecs_cluster.my_ecs_cluster.id
-  task_definition = aws_ecs_task_definition.inventory_service_task.arn
+  task_definition = aws_ecs_task_definition.inventory_task.arn
   desired_count   = 1
   launch_type     = "EC2"
 
@@ -45,10 +45,10 @@ resource "aws_ecs_service" "inventory_service" {
   }
 }
 
-resource "aws_ecs_service" "orders_service" {
-  name            = "orders-service"
+resource "aws_ecs_service" "orders" {
+  name            = "orders"
   cluster         = aws_ecs_cluster.my_ecs_cluster.id
-  task_definition = aws_ecs_task_definition.orders_service_task.arn
+  task_definition = aws_ecs_task_definition.orders_task.arn
   desired_count   = 2
   launch_type     = "EC2"
 

@@ -4,8 +4,8 @@ resource "aws_ecs_cluster" "my_ecs_cluster" {
 }
 
 #ECS task definitions
-resource "aws_ecs_task_definition" "inventory_service_task" {
-  family                   = "inventory-service"
+resource "aws_ecs_task_definition" "inventory_task" {
+  family                   = "inventory"
   network_mode             = "bridge"
   requires_compatibilities = ["EC2"]
   cpu                      = "256"
@@ -13,8 +13,8 @@ resource "aws_ecs_task_definition" "inventory_service_task" {
 
   container_definitions = jsonencode([
     {
-      name      = "inventory-service"
-      image     = "your_docker_repo/inventory-service:latest"
+      name      = "inventory"
+      image     = "your_docker_repo/inventory:latest"
       cpu       = 256
       memory    = 512
       essential = true
@@ -27,16 +27,18 @@ resource "aws_ecs_task_definition" "inventory_service_task" {
       environment = [
         { name = "DB_HOST", value = aws_rds_cluster.inventory_db.endpoint },
         { name = "DB_NAME", value = aws_rds_cluster.inventory_db.database_name },
-        { name = "DB_USER", value = "admin" },
-        { name = "DB_PASSWORD", value = "your_password" }
+        { name = "DB_USER", value = "postgres" },
+        { name = "DB_PASSWORD", value = "postgres" },
+        { name = "DB_PORT", value = "5432" },
+        { name = "PLATFORM", value = "ECS" }
       ]
     }
   ])
 }
 
 
-resource "aws_ecs_task_definition" "orders_service_task" {
-  family                   = "orders-service"
+resource "aws_ecs_task_definition" "orders_task" {
+  family                   = "orders"
   network_mode             = "bridge"
   requires_compatibilities = ["EC2"]
   cpu                      = "256"
@@ -44,8 +46,8 @@ resource "aws_ecs_task_definition" "orders_service_task" {
 
   container_definitions = jsonencode([
     {
-      name      = "orders-service"
-      image     = "your_docker_repo/orders-service:latest"
+      name      = "orders"
+      image     = "your_docker_repo/orders:latest"
       cpu       = 256
       memory    = 512
       essential = true
@@ -58,8 +60,10 @@ resource "aws_ecs_task_definition" "orders_service_task" {
       environment = [
         { name = "DB_HOST", value = aws_rds_cluster.orders_db.endpoint },
         { name = "DB_NAME", value = aws_rds_cluster.orders_db.database_name },
-        { name = "DB_USER", value = "admin" },
-        { name = "DB_PASSWORD", value = "your_password" }
+        { name = "DB_USER", value = "postgres" },
+        { name = "DB_PASSWORD", value = "postgres" },
+        { name = "DB_PORT", value = "5432" },
+        { name = "PLATFORM", value = "ECS" },
       ]
     }
   ])

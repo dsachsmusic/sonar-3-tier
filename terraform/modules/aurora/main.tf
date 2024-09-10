@@ -5,8 +5,8 @@ resource "aws_rds_cluster" "inventory_db" {
   engine                  = "aurora-postgresql"
   engine_version          = "13.4"
   database_name           = "inventory_world"
-  master_username         = "admin"
-  master_password         = "your_password"
+  master_username         = "postgres"
+  master_password         = "postgres"
   backup_retention_period = 7
   preferred_backup_window = "07:00-09:00"
 }
@@ -22,8 +22,8 @@ resource "aws_rds_cluster" "orders_db" {
   engine                  = "aurora-postgresql"
   engine_version          = "13.4"
   database_name           = "orders_world"
-  master_username         = "admin"
-  master_password         = "your_password"
+  master_username         = "postgres"
+  master_password         = "postgres"
   backup_retention_period = 7
   preferred_backup_window = "07:00-09:00"
 }
@@ -65,20 +65,22 @@ resource "postgresql_schema" "orders_schema" {
 }
 
 resource "postgresql_table" "orders_table" {
-  provider = postgresql.orders
-  name   = "orders"
-  schema = postgresql_schema.orders_schema.name
+  provider = postgresql
+  name     = "orders"
+  schema   = postgresql_schema.orders_schema.name
 
   owner = "admin"
 
   columns = [
     {
-      name = "time"
-      type = "timestamp"
+      name    = "time"
+      type    = "timestamp"
+      default = "CURRENT_TIMESTAMP"
     },
     {
-      name = "item"
-      type = "text"
+      name    = "item"
+      type    = "text"
     }
   ]
 }
+
