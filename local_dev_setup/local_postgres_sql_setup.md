@@ -11,7 +11,8 @@ Create tables
   - Switch to the inventory_world DB:
     - \c inventory_world
 	- Run the following DML statement
-	```CREATE TABLE inventory (
+	```
+        CREATE TABLE inventory (
           item TEXT,
           count INTEGER
        );
@@ -19,7 +20,8 @@ Create tables
   - Switch to the orders_world DB:
     - \c orders_world
 	- Run the following DML statement
-	```CREATE TABLE orders (
+	```
+        CREATE TABLE orders (
           time TIMESTAMP,
           item TEXT
         );
