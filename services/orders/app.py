@@ -5,6 +5,9 @@ from sqlalchemy.exc import SQLAlchemyError
 import boto3
 import requests
 from datetime import datetime, timedelta
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 
@@ -12,11 +15,11 @@ app = Flask(__name__)
 inventory_fqdn = "inventory"
 
 #for testing Flask app locally, outside of a container, uncomment the following:
-os.environ['DB_HOST'] = "localhost"
-os.environ['DB_NAME'] = "orders"
-os.environ['DB_USER'] = "postgres"
-os.environ['DB_PASSWORD'] = "postgres"
-os.environ['PLATFORM'] = "Windows"
+#os.environ['DB_HOST'] = "localhost"
+#os.environ['DB_NAME'] = "orders"
+#os.environ['DB_USER'] = "postgres"
+#os.environ['DB_PASSWORD'] = "postgres"
+#os.environ['PLATFORM'] = "Windows"
 
 # Reads environment variables that are set...
 # in the Kubernetes config map (in the case of local testing), or, in...
@@ -26,7 +29,6 @@ DB_PORT = os.getenv('DB_PORT', 5432)  # Default to 5432 if not set
 DB_USER = os.getenv('DB_USER')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_NAME = os.getenv('DB_NAME')
-
 PLATFORM = os.getenv('PLATFORM')  # 'minikube' or 'aws' (or Windows, for testing)
 
 # Create the database engine
@@ -48,7 +50,7 @@ def get_order_count_hello():
             result = connection.execute(
                 query,
                 {
-                "start_time": datetime.now() - timedelta(hours=1),
+                "start_time": datetime.now() - timedelta(hours=24),
                 "end_time": datetime.now()
                 })
             count = result.scalar()  # Get the first column of the first row
@@ -169,4 +171,4 @@ def order_hello():
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5001)
+    app.run(host='0.0.0.0', port=5000)
