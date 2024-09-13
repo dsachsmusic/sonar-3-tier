@@ -1,0 +1,17 @@
+
+#DB related environment variables defined here, similar to...
+#them being defined in the ECS task definition when deploying to...
+#AWS
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: inventory-config
+data:
+  #local machine IP, assuming Postgres is running...
+  #locally on Windows laptop
+  DB_HOST: "192.168.86.153"
+  DB_PORT: "5432"
+  DB_USER: "postgres"
+  DB_PASSWORD: "postgres"
+  DB_NAME: "inventory"
+  PLATFORM: "Minikube"
