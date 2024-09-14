@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  labels:
+    app: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend-container
+        image: dsachsmusic/order-a-greeting-frontend:latest
+        ports:
+        - containerPort: 5000
+        env:
+        - name: PORT_INVENTORY
+          valueFrom:
+            configMapKeyRef:
+              name: frontend-config
+              key: PORT_INVENTORY
+        - name: FQDN_INVENTORY
+          valueFrom:
+            configMapKeyRef:
+              name: frontend-config
+              key: FQDN_INVENTORY
+        - name: FQDN_ORDERS
+          valueFrom:
+            configMapKeyRef:
+              name: frontend-config
+              key: FQDN_ORDERS
+        - name: PORT_ORDERS
+          valueFrom:
+            configMapKeyRef:
+              name: frontend-config
+              key: PORT_ORDERS
+        - name: FQDN_FRONTEND_EXTERNAL
+          valueFrom:
+            configMapKeyRef:
+              name: frontend-config
+              key: FQDN_FRONTEND_EXTERNAL
+        - name: PORT_FRONTEND_EXTERNAL
+          valueFrom:
+            configMapKeyRef:
+              name: frontend-config
+              key: PORT_FRONTEND_EXTERNAL
+        - name: PORT_FLASK_FRONTEND
+          valueFrom:
+            configMapKeyRef:
+              name: frontend-config
+              key: PORT_FLASK_FRONTEND

@@ -1,0 +1,16 @@
+#Environment variables defined here, similar to...
+#them being defined in the ECS task definition when deploying to...
+#AWS
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+data:
+# These are the DNS names and ports for the services in the cluster
+  FQDN_INVENTORY: "inventory.default.svc.cluster.local"
+  PORT_INVENTORY: "81" 
+  FQDN_ORDERS: "orders.default.svc.cluster.local"
+  PORT_ORDERS: "82"
+  FQDN_FRONTEND_EXTERNAL: "127.0.0.1" #run "minikube tunnel" (cmdline) to enable connecting via this IP address
+  PORT_FRONTEND_EXTERNAL: "80" #with minikube, use load balancer port, when testing locally, using port flask exposes
+  PORT_FLASK_FRONTEND: "5000"
