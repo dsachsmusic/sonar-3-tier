@@ -11,15 +11,19 @@ logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 
-#can update/change for local desting
-inventory_fqdn = "inventory"
-
 #for testing Flask app locally, outside of a container, uncomment the following:
-#os.environ['DB_HOST'] = "localhost"
-#os.environ['DB_NAME'] = "orders"
-#os.environ['DB_USER'] = "postgres"
-#os.environ['DB_PASSWORD'] = "postgres"
-#os.environ['PLATFORM'] = "Windows"
+os.environ['DB_HOST'] = "localhost"
+os.environ['DB_NAME'] = "orders"
+os.environ['DB_USER'] = "postgres"
+os.environ['DB_PASSWORD'] = "postgres"
+os.environ['PLATFORM'] = "Windows"
+os.environ['FQDN_INVENTORY'] = "192.168.86.153"
+os.environ['PORT_FLASK_INVENTORY'] = "5001"
+os.environ['PORT_INVENTORY'] = os.getenv('PORT_FLASK_INVENTORY')
+os.environ['PORT_FLASK_ORDERS'] = "5002"
+
+
+
 
 # Reads environment variables that are set...
 # in the Kubernetes config map (in the case of local testing), or, in...
@@ -29,7 +33,10 @@ DB_PORT = os.getenv('DB_PORT', 5432)  # Default to 5432 if not set
 DB_USER = os.getenv('DB_USER')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_NAME = os.getenv('DB_NAME')
-PLATFORM = os.getenv('PLATFORM')  # 'minikube' or 'aws' (or Windows, for testing)
+PLATFORM = os.getenv('PLATFORM')
+FQDN_INVENTORY = os.getenv('FQDN_INVENTORY')
+PORT_INVENTORY = os.getenv('PORT_INVENTORY')
+PORT_FLASK_ORDERS = os.getenv('PORT_FLASK_ORDERS')
 
 # Create the database engine
 DATABASE_URL = f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
@@ -46,12 +53,13 @@ def get_order_count_hello():
     try:
         with engine.connect() as connection:
             # Run the SQL query to get the count of relevant orders
+            # Note: end_time below is into future as hack to account for servers different time zones.
             query = text("SELECT COUNT(*) FROM orders WHERE time BETWEEN :start_time AND :end_time AND item = 'hello';")
             result = connection.execute(
                 query,
                 {
                 "start_time": datetime.now() - timedelta(hours=24),
-                "end_time": datetime.now()
+                "end_time": datetime.now() + timedelta(hours=24)
                 })
             count = result.scalar()  # Get the first column of the first row
             return count
@@ -121,6 +129,22 @@ def call_get_order_count_hello():
     order_count = get_order_count_hello()
     return jsonify({"order count": order_count})
 
+@app.route('/orders/delete/hello_all', methods=['DELETE'])
+def delete_hello_all():
+    try:
+        with engine.connect() as connection:
+            # Start a transaction
+            with connection.begin() as transaction:
+                # Update the count
+                connection.execute(text("DELETE FROM orders WHERE item = 'hello';"))
+            # Retrieve the current count
+            # Note: The above SQL transaction is commited after the block ends...so these next lines needs to be in a new block
+            new_order_count = get_order_count_hello()
+            new_order_count_message = "The new order count is " + str(new_order_count)
+            return jsonify({"message": new_order_count_message})
+    except SQLAlchemyError as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/orders/put/order/hello', methods=['PUT'])
 def order_hello():
     
@@ -138,7 +162,7 @@ def order_hello():
             update_k8s_replica_count("orders-deployment", 2)
             return_strings.append("Somehow more than two containers are running. Going to scale down")
 
-    if 3 < order_count < 6:
+    if 3 < int(order_count) < 6:
         # Scale up if the order count is between 3 and 6
         if PLATFORM == 'aws':
             current_count = get_ecs_service_task_count("orders")
@@ -152,23 +176,23 @@ def order_hello():
             return_strings.append("Not enough nodes to fulfill your order. Must increment nodes by one...please try again later.")
             return_strings.append("Warning: The app is running on a Windows machine, not in containers. Manual steps are needed in this case.")
 
-        return render_template_string(" ".join(return_strings))
+        return jsonify({"message": (" ".join(return_strings))})
 
-    elif order_count >= 6:
+    elif int(order_count) >= 6:
         # Return an error message if the order count is too high
-        return render_template_string("Our system cannot process any more orders. Please try again later.")
+        return jsonify({"message": "Our system cannot process any more orders. Please try again later."})
     
     #else - there are between 1 and 3 orders currently items...we can handle processing an order
     else:
         # Add an order to the orders DB and call the inventory service to check and update inventory and 
-        inventory_response = requests.get(f'http://{inventory_fqdn}:5000/inventory/get/hello').json()
+        inventory_response = requests.get(f'http://{FQDN_INVENTORY}:{PORT_INVENTORY}/inventory/get/hello').json()
         if inventory_response['count'] >= 1:
             append_order_to_orders_db_hello()
-            requests.put(f'http://{inventory_fqdn}:5000/inventory/update/remove/hello')
-            return render_template_string("Thank you for your order. Here it is: Hello World!")
+            requests.put(f'http://{FQDN_INVENTORY}:{PORT_INVENTORY}/inventory/update/remove/hello')
+            return jsonify({"message": "Thank you for your order. Here it is: Hello World!"})
         else:
-            return render_template_string("There is no inventory left of what you ordered. Somebody needs to manually update inventory (via psql)!")
+            return jsonify({"message": "There is no inventory left of what you ordered. Somebody needs to manually update inventory!"})
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=PORT_FLASK_ORDERS)

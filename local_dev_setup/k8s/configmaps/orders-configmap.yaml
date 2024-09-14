@@ -1,5 +1,4 @@
-
-#DB related environment variables defined here, similar to...
+#Environment variables defined here, similar to...
 #them being defined in the ECS task definition when deploying to...
 #AWS
 apiVersion: v1
@@ -15,3 +14,6 @@ data:
   DB_PASSWORD: "postgres"
   DB_NAME: "orders"
   PLATFORM: "Minikube"
+  FQDN_INVENTORY: "inventory.default.svc.cluster.local"
+  PORT_INVENTORY: "81" #with minikube, use load balancer port, when testing locally, using port flask exposes
+  PORT_FLASK_ORDERS: "5000" #with minikube, we'll simply run all Flask apps on port 5000

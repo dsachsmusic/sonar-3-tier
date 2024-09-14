@@ -1,5 +1,4 @@
-
-#DB related environment variables defined here, similar to...
+#Environment variables defined here, similar to...
 #them being defined in the ECS task definition when deploying to...
 #AWS
 apiVersion: v1
@@ -15,3 +14,4 @@ data:
   DB_PASSWORD: "postgres"
   DB_NAME: "inventory"
   PLATFORM: "Minikube"
+  PORT_FLASK_INVENTORY: "5000"

@@ -64,6 +64,10 @@ resource "aws_ecs_task_definition" "orders_task" {
         { name = "DB_PASSWORD", value = "postgres" },
         { name = "DB_PORT", value = "5432" },
         { name = "PLATFORM", value = "ECS" },
+        { name = "FQDN_INVENTORY", value = "inventory"},
+        { name = "PORT_INVENTORY", value = "80"},
+        { name = "FQDN_ORDERS", value = "orders"},
+        { name = "PORT_FLASK_EXPOSES", value = "5000"}
       ]
     }
   ])

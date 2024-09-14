@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: inventory-service
+  name: inventory
 spec:
   type: LoadBalancer
   selector:
     app: inventory
   ports:
     - protocol: TCP
-      port: 80
+      port: 81 #using unique port for local testing - so w/minkube tunnel, services' ports are unique
       targetPort: 5000

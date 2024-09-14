@@ -7,16 +7,16 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
-
 app = Flask(__name__)
 
-
 #for testing Flask app locally, outside of a container, uncomment the following:
-#os.environ['DB_HOST'] = 'localhost'
-#os.environ['DB_NAME'] = "inventory"
-#os.environ['DB_USER'] = "postgres"
-#os.environ['DB_PASSWORD'] = "postgres"
-#os.environ['PLATFORM'] = "Windows"
+os.environ['DB_HOST'] = 'localhost'
+os.environ['DB_NAME'] = "inventory"
+os.environ['DB_USER'] = "postgres"
+os.environ['DB_PASSWORD'] = "postgres"
+os.environ['PLATFORM'] = "Windows"
+os.environ['PORT_FLASK_INVENTORY'] = "5001"
+
 
 # Reads environment variables that are set...
 # in the Kubernetes config map (in the case of local testing), or, in...
@@ -26,7 +26,7 @@ DB_PORT = os.getenv('DB_PORT', 5432)  # Default to 5432 if not set
 DB_USER = os.getenv('DB_USER')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_NAME = os.getenv('DB_NAME')
-PLATFORM = os.getenv('PLATFORM')
+PORT_FLASK_INVENTORY = os.getenv('PORT_FLASK_INVENTORY')
 
 # Create the database engine
 DATABASE_URL = f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
@@ -61,10 +61,11 @@ def update_inventory_add_hello_20():
                 # Update the count
                 connection.execute(text("UPDATE inventory SET count = 20 where item = 'hello'"))
             
-                # Retrieve the current count
-                new_inventory = connection.execute(text("SELECT count FROM inventory WHERE item = 'hello';"))
-                new_count_message = "The new count is " + str(new_inventory.scalar())
-                return jsonify({"message": new_count_message})
+            # Retrieve the current count
+            # Note: The above SQL transaction is commited after the block ends...so these next lines needs to be in a new block
+            new_inventory = connection.execute(text("SELECT count FROM inventory WHERE item = 'hello';"))
+            new_count_message = "The new count is " + str(new_inventory.scalar())
+            return jsonify({"message": new_count_message})
     except SQLAlchemyError as e:
         return jsonify({"error": str(e)}), 500
 
@@ -100,4 +101,4 @@ def update_inventory_remove_hello():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=PORT_FLASK_INVENTORY)

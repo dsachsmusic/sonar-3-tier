@@ -45,3 +45,14 @@ spec:
             configMapKeyRef:
               name: inventory-config
               key: DB_PASSWORD
+        - name: PLATFORM
+          valueFrom:
+            configMapKeyRef:
+              name: inventory-config
+              key: PLATFORM
+        - name: PORT_FLASK_INVENTORY
+          valueFrom:
+            configMapKeyRef:
+              name: inventory-config
+              key: PORT_FLASK_INVENTORY
+        

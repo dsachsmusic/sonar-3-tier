@@ -45,3 +45,23 @@ spec:
             configMapKeyRef:
               name: orders-config
               key: DB_PASSWORD
+        - name: PLATFORM
+          valueFrom:
+            configMapKeyRef:
+              name: orders-config
+              key: PLATFORM
+        - name: FQDN_INVENTORY
+          valueFrom:
+            configMapKeyRef:
+              name: orders-config
+              key: FQDN_INVENTORY
+        - name: PORT_INVENTORY
+          valueFrom:
+            configMapKeyRef:
+              name: orders-config
+              key: PORT_INVENTORY
+        - name: PORT_FLASK_ORDERS
+          valueFrom:
+            configMapKeyRef:
+              name: orders-config
+              key: PORT_FLASK_ORDERS
