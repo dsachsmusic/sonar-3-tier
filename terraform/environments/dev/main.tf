@@ -7,10 +7,12 @@ module "ec2" {
 }
 
 module "vpc" {
-  source = "../../modules/vpc"
-  environment = var.environment
-  
-  # Other VPC-specific variables
+  source              = "../../modules/vpc"
+  environment         = var.environment
+  cidr_block          = var.vpc_cidr_block
+  public_subnet_cidrs = var.public_subnet_cidrs
+  private_subnet_cidrs = var.private_subnet_cidrs
+  availability_zones  = data.aws_availability_zones.available.names
 }
 
 module "ecs" {

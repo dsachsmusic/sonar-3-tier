@@ -1,7 +1,8 @@
 #Define ECS cluster
-resource "aws_ecs_cluster" "my_ecs_cluster" {
-  name = "my-ecs-cluster"
+resource "aws_ecs_cluster" "example" {
+  name = "${var.environment}-cluster"
 }
+
 
 #ECS task definitions
 resource "aws_ecs_task_definition" "inventory_task" {
@@ -14,7 +15,7 @@ resource "aws_ecs_task_definition" "inventory_task" {
   container_definitions = jsonencode([
     {
       name      = "inventory"
-      image     = "your_docker_repo/inventory:latest"
+      image     = "dsachsmusic/order-a-greeting-inventory:latest"
       cpu       = 256
       memory    = 512
       essential = true
@@ -47,7 +48,7 @@ resource "aws_ecs_task_definition" "orders_task" {
   container_definitions = jsonencode([
     {
       name      = "orders"
-      image     = "your_docker_repo/orders:latest"
+      image     = "dsachsmusic/order-a-greeting-orders:latest"
       cpu       = 256
       memory    = 512
       essential = true
