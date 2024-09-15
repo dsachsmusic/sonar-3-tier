@@ -6,13 +6,13 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 #for testing Flask app locally, outside of a container, uncomment the following:
-os.environ['FQDN_INVENTORY'] = "192.168.86.153"
-os.environ['PORT_INVENTORY'] = "5001" #for local testing, use port we have our inventory app run on for testing
-os.environ['FQDN_ORDERS'] = "192.168.86.153"
-os.environ['PORT_ORDERS'] = "5002" # for local testing...
-os.environ['FQDN_FRONTEND_EXTERNAL'] = "192.168.86.153"
-os.environ['PORT_FLASK_FRONTEND'] = "5000" # for local testing...no change from Flask default for frontend service
-os.environ['PORT_FRONTEND_EXTERNAL'] = os.getenv('PORT_FLASK_FRONTEND')
+#os.environ['FQDN_INVENTORY'] = "192.168.86.153"
+#os.environ['PORT_INVENTORY'] = "5001" #for local testing, use port we have our inventory app run on for testing
+#os.environ['FQDN_ORDERS'] = "192.168.86.153"
+#os.environ['PORT_ORDERS'] = "5002" # for local testing...
+#os.environ['FQDN_FRONTEND_EXTERNAL'] = "192.168.86.153"
+#os.environ['PORT_FLASK_FRONTEND'] = "5000" # for local testing...no change from Flask default for frontend service
+#os.environ['PORT_FRONTEND_EXTERNAL'] = os.getenv('PORT_FLASK_FRONTEND')
 
 
 FQDN_INVENTORY = os.getenv('FQDN_INVENTORY')
@@ -121,23 +121,23 @@ def api_frontend():
             function getOrderCountHello() {
                 sendRequest('GET', '/api/get_order_count_hello');
             }
-            
+
             function deleteAllOrdersHello() {
                 sendRequest('DELETE', '/api/delete_all_orders_hello');
             }
-            
+
             function placeOrderHello() {
                 sendRequest('PUT', '/api/place_order_hello');
             }
-            
+
             function getInventoryCountHello() {
                 sendRequest('GET', '/api/get_inventory_count_hello');
             }
-            
+
             function setInventoryCountHello20() {
                 sendRequest('PATCH', '/api/set_inventory_count_hello_20');
             }
-            
+
             function removeInventoryHello() {
                 sendRequest('PUT', '/api/remove_inventory_hello');
             }    

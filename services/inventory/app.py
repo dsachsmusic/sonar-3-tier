@@ -10,12 +10,12 @@ logging.basicConfig(level=logging.INFO)
 app = Flask(__name__)
 
 #for testing Flask app locally, outside of a container, uncomment the following:
-os.environ['DB_HOST'] = 'localhost'
-os.environ['DB_NAME'] = "inventory"
-os.environ['DB_USER'] = "postgres"
-os.environ['DB_PASSWORD'] = "postgres"
-os.environ['PLATFORM'] = "Windows"
-os.environ['PORT_FLASK_INVENTORY'] = "5001"
+#os.environ['DB_HOST'] = 'localhost'
+#os.environ['DB_NAME'] = "inventory"
+#os.environ['DB_USER'] = "postgres"
+#os.environ['DB_PASSWORD'] = "postgres"
+#os.environ['PLATFORM'] = "Windows"
+#os.environ['PORT_FLASK_INVENTORY'] = "5001"
 
 
 # Reads environment variables that are set...

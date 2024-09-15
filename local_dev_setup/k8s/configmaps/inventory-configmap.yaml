@@ -13,5 +13,5 @@ data:
   DB_USER: "postgres"
   DB_PASSWORD: "postgres"
   DB_NAME: "inventory"
-  PLATFORM: "Minikube"
+  PLATFORM: "minikube"
   PORT_FLASK_INVENTORY: "5000"

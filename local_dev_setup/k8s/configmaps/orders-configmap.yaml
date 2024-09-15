@@ -13,7 +13,7 @@ data:
   DB_USER: "postgres"
   DB_PASSWORD: "postgres"
   DB_NAME: "orders"
-  PLATFORM: "Minikube"
+  PLATFORM: "minikube"
   FQDN_INVENTORY: "inventory.default.svc.cluster.local"
   PORT_INVENTORY: "81" #with minikube, use load balancer port, when testing locally, using port flask exposes
   PORT_FLASK_ORDERS: "5000" #with minikube, we'll simply run all Flask apps on port 5000

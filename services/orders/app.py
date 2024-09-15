@@ -12,15 +12,15 @@ logging.basicConfig(level=logging.INFO)
 app = Flask(__name__)
 
 #for testing Flask app locally, outside of a container, uncomment the following:
-os.environ['DB_HOST'] = "localhost"
-os.environ['DB_NAME'] = "orders"
-os.environ['DB_USER'] = "postgres"
-os.environ['DB_PASSWORD'] = "postgres"
-os.environ['PLATFORM'] = "Windows"
-os.environ['FQDN_INVENTORY'] = "192.168.86.153"
-os.environ['PORT_FLASK_INVENTORY'] = "5001"
-os.environ['PORT_INVENTORY'] = os.getenv('PORT_FLASK_INVENTORY')
-os.environ['PORT_FLASK_ORDERS'] = "5002"
+#os.environ['DB_HOST'] = "localhost"
+#os.environ['DB_NAME'] = "orders"
+#os.environ['DB_USER'] = "postgres"
+#os.environ['DB_PASSWORD'] = "postgres"
+#os.environ['PLATFORM'] = "Windows"
+#os.environ['FQDN_INVENTORY'] = "192.168.86.153"
+#os.environ['PORT_FLASK_INVENTORY'] = "5001"
+#os.environ['PORT_INVENTORY'] = os.getenv('PORT_FLASK_INVENTORY')
+#os.environ['PORT_FLASK_ORDERS'] = "5002"
 
 
 
@@ -98,7 +98,9 @@ def get_k8s_service_replica_count(deployment_name):
     """
     Get the current number of replicas for a Kubernetes deployment in Minikube.
     """
-    k8s_api_url = f"http://localhost:8001/apis/apps/v1/namespaces/default/deployments/{deployment_name}"
+    #For local testing of this the K8s API, With minikube, use kubectl proxy to enable start serving Kubernetes API from localhost:8001
+    #currently communication within pod...to api....is not working...connection refused.
+    k8s_api_url = "http://kubernetes.default.svc/apis/apps/v1/namespaces/default/deployments/{deployment_name}"
     response = requests.get(k8s_api_url)
     if response.status_code == 200:
         replicas = response.json()['status']['replicas']
@@ -111,7 +113,9 @@ def update_k8s_replica_count(deployment_name, replicas):
     """
     Update the number of replicas for a Kubernetes deployment in Minikube.
     """
-    k8s_api_url = f"http://localhost:8001/apis/apps/v1/namespaces/default/deployments/{deployment_name}/scale"
+    #For local testing of this the K8s API, With minikube, use kubectl proxy to enable start serving Kubernetes API from localhost:8001
+    #currently communication within pod...to api....is not working...connection refused.
+    k8s_api_url = "http://kubernetes.default.svc/apis/apps/v1/namespaces/default/deployments/{deployment_name}/scale"
     headers = {"Content-Type": "application/strategic-merge-patch+json"}
     data = {"spec": {"replicas": replicas}}
     response = requests.patch(k8s_api_url, json=data, headers=headers)
@@ -156,11 +160,12 @@ def order_hello():
         if current_count > 2:
             update_ecs_task_count("orders", 2)
             return_strings.append("Somehow more than two containers are running. Going to scale down.")
-    elif PLATFORM == 'minikube':
-        current_count = get_k8s_service_replica_count("orders-deployment")
-        if current_count > 2:
-            update_k8s_replica_count("orders-deployment", 2)
-            return_strings.append("Somehow more than two containers are running. Going to scale down")
+    # commenting this out - since calls to api server from within pods running in minikube aren't working
+    #elif PLATFORM == 'minikube':
+    #    current_count = get_k8s_service_replica_count("orders-deployment")
+    #    if current_count > 2:
+    #        update_k8s_replica_count("orders-deployment", 2)
+    #        return_strings.append("Somehow more than two containers are running. Going to scale down")
 
     if 3 < int(order_count) < 6:
         # Scale up if the order count is between 3 and 6
@@ -169,8 +174,9 @@ def order_hello():
             update_ecs_task_count("orders", current_count + 1)
             return_strings.append("Not enough nodes to fulfill your order. Must increment nodes by one...please try again later.")
         elif PLATFORM == 'minikube':
-            current_count = get_k8s_service_replica_count("orders-deployment")
-            update_k8s_replica_count("orders-deployment", current_count + 1)
+            # commenting this out - since calls to api server from within pods running in minikube aren't working
+            #current_count = get_k8s_service_replica_count("orders-deployment")
+            #update_k8s_replica_count("orders-deployment", current_count + 1)
             return_strings.append("Not enough nodes to fulfill your order. Must increment nodes by one...please try again later.")
         elif PLATFORM == 'Windows':
             return_strings.append("Not enough nodes to fulfill your order. Must increment nodes by one...please try again later.")

@@ -11,6 +11,8 @@ minikube start
 - `kubectl apply -f c:\users\david\working\sonar-3-tier\local_dev_setup\k8s\services\frontend-service.yaml`
 - `kubectl apply -f c:\users\david\working\sonar-3-tier\local_dev_setup\k8s\services\inventory-service.yaml`
 - `kubectl apply -f c:\users\david\working\sonar-3-tier\local_dev_setup\k8s\services\orders-service.yaml`
+- `kubectl apply -f C:\users\david\working\sonar-3-tier\local_dev_setup\k8s\rbac\api-access-role.yaml`
+- `kubectl apply -f C:\users\david\working\sonar-3-tier\local_dev_setup\k8s\rbac\api-access-role-binding.yaml`
 
 ### Confirm pods and services are running
 - `kubectl get pods`
@@ -57,5 +59,13 @@ Potential issues:
   - `select * from orders;`
 
 ### Issues with pods spinning up
-kubectl describe deployment orders
-kubectl rollout status deployment/orders-deployment
+`kubectl describe deployment orders`
+`kubectl rollout status deployment/orders-deployment`
+
+### More troubleshooting tips
+Create and shell into a busybox
+`kubectl run -i --tty --rm debug --image=busybox --restart=Never -- sh`
+
+### Issues with roles/role bindings
+`kubectl auth can-i get deployments --as=system:serviceaccount:default:default`
+etc.
