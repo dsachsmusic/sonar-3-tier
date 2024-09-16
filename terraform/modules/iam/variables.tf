@@ -1,4 +1,4 @@
-/*
-Variables for defining resource names, security group rules, 
-and other IAM configurations.
-*/
+variable "environment" {
+  description = "Environment that the resources will be deployed to"
+  type        = string
+}
