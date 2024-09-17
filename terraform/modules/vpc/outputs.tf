@@ -3,12 +3,13 @@ output "orderagreeting_vpc_id" {
   value = aws_vpc.orderagreeting_vpc.id
 }
 
-output "public_subnet_ids" {
+output "orderagreeting_public_subnet_ids" {
   description = "The IDs of the public subnets"
   value       = aws_subnet.orderagreeting_public_subnet[*].id
 }
 
-output "private_subnet_ids" {
+output "orderagreeting_private_subnet_ids" {
   description = "The IDs of the private subnets"
   value       = aws_subnet.orderagreeting_private_subnet[*].id
 }
+

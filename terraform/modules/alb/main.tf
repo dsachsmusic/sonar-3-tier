@@ -2,8 +2,8 @@ resource "aws_lb" "orderagreeting_frontend_load_balancer" {
   name               = "${var.environment}-orderagreeting-frontend-lb"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = [aws_security_group.orderagreeting_frontend_lb_sg.id]
-  subnets            = aws_subnet.public[*].id
+  security_groups    = [var.frontend_lb_sg_id]
+  subnets            = aws_subnet.orderagreeting_public_subnet[*].id
 
   enable_deletion_protection = false
   idle_timeout              = 60
@@ -14,7 +14,7 @@ resource "aws_lb_target_group" "orderagreeting_frontend_lb_target_group" {
   name     = "${var.environment}-orderagreeting-frontend-lb-tg"
   port     = 5000
   protocol = "HTTP"
-  vpc_id   = aws_vpc.orderagreeting_vpc.id
+  vpc_id   = var.orderagreeting_vpc_id
 
   health_check {
     path                = "/" 
@@ -29,7 +29,7 @@ resource "aws_lb_target_group" "orderagreeting_frontend_lb_target_group" {
 
 #port and protocol you want to expose to clients
 resource "aws_lb_listener" "orderagreeting_frontend_lb_listener" { 
-  load_balancer_arn = aws_lb.orderagreeting_frontend_lb.arn
+  load_balancer_arn = aws_lb.orderagreeting_frontend_load_balancer.arn
   port              = 80
   protocol          = "HTTP"
 

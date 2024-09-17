@@ -7,3 +7,13 @@ variable "instance_class" {
   description = "Instance class for the DB servers"
   type        = string
 }
+
+variable "orderagreeting_aurora_sg_id" {
+  description = "Security group for Aurora to join"
+  type        = string
+}
+
+variable "db_subnet_group_name" {
+  description = "DB subnet group for Aurora to join"
+  type        = string
+}

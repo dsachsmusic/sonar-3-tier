@@ -1,5 +1,28 @@
 #Aurora's default setting should already span multiple AZs,
 #but ensure subnets are set accordingly.
+
+/*
+#comment out this section on first run
+provider "postgresql" {
+  alias    = "inventory"
+  host     = "REPLACE_WITH_ACTUAL_ENDPOINT_AFTER_CREATION"
+  port     = 5432
+  username = "postgres"
+  password = "postgres"
+  database = "inventory"
+  sslmode  = "disable" # If you are not using SSL
+}
+
+provider "postgresql" {
+  alias    = "orders"
+  host     = "REPLACE_WITH_ACTUAL_ENDPOINT_AFTER_CREATION"
+  port     = 5432
+  username = "postgres"
+  password = "postgres"
+  database = "orders"
+  sslmode  = "disable" # If you are not using SSL
+}
+*/
 resource "aws_rds_cluster" "inventory_db" {
   cluster_identifier      = "${var.environment}-inventory-cluster"
   engine                  = "aurora-postgresql"
@@ -9,8 +32,8 @@ resource "aws_rds_cluster" "inventory_db" {
   master_password         = "postgres"
   backup_retention_period = 7
   preferred_backup_window = "07:00-09:00"
-  db_subnet_group_name    = aws_db_subnet_group.orderagreeting_db_subnet_group.name
-  vpc_security_group_ids  = [aws_security_group.orderagreeting_aurora_sg.id]  
+  db_subnet_group_name    = var.db_subnet_group_name
+  vpc_security_group_ids  = [var.orderagreeting_aurora_sg_id]
 }
 
 resource "aws_rds_cluster_instance" "inventory_instance" {
@@ -28,8 +51,8 @@ resource "aws_rds_cluster" "orders_db" {
   master_password         = "postgres"
   backup_retention_period = 7
   preferred_backup_window = "07:00-09:00"
-  db_subnet_group_name    = aws_db_subnet_group.orderagreeting_db_subnet_group.name
-  vpc_security_group_ids  = [aws_security_group.orderagreeting_aurora_sg.id]
+  db_subnet_group_name    = var.db_subnet_group_name
+  vpc_security_group_ids  = [var.orderagreeting_aurora_sg_id]
 }
 
 resource "aws_rds_cluster_instance" "orders_instance" {
@@ -37,7 +60,8 @@ resource "aws_rds_cluster_instance" "orders_instance" {
   instance_class     = var.instance_class
   engine             = aws_rds_cluster.orders_db.engine
 }
-
+/*
+#comment out this section on first run
 #define the tables 
 resource "postgresql_schema" "inventory_schema" {
   provider = postgresql.inventory
@@ -69,7 +93,7 @@ resource "postgresql_schema" "orders_schema" {
 }
 
 resource "postgresql_table" "orders_table" {
-  provider = postgresql
+  provider = postgresql.orders
   name     = "orders"
   schema   = postgresql_schema.orders_schema.name
 
@@ -87,4 +111,4 @@ resource "postgresql_table" "orders_table" {
     }
   ]
 }
-
+*/

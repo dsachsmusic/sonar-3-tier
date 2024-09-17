@@ -1,3 +1,8 @@
+# Data source to retrieve the ALB
+data "aws_lb" "orderagreeting_frontend_load_balancer" {
+  name = "${var.environment}-orderagreeting-frontend-lb"
+}
+
 resource "aws_ecs_cluster" "orderagreeting_public_cluster" {
   name = "${var.environment}-orderagreeting-public-cluster"
 }
@@ -6,7 +11,7 @@ resource "aws_launch_configuration" "orderagreeting_public_launch_configuration"
   name          = "${var.environment}-orderagreeting-public-lc"
   image_id      = var.ami
   instance_type = var.instance_type
-  iam_instance_profile = aws_iam_instance_profile.orderagreeting_ecs_instance_profile.name
+  iam_instance_profile = var.iam_instance_profile_name
 
 
   user_data = <<-EOF
@@ -27,9 +32,9 @@ resource "aws_autoscaling_group" "orderagreeting_public_autoscaling_group" {
 
 
   vpc_zone_identifier = [
-    aws_subnet.orderagreeting_public_subnet[0].id,
-    aws_subnet.orderagreeting_public_subnet[1].id,
-    aws_subnet.orderagreeting_public_subnet[2].id
+    var.public_subnet_ids[0],
+    var.public_subnet_ids[1],
+    var.public_subnet_ids[2]
   ]
 
   tag {
@@ -47,7 +52,7 @@ resource "aws_launch_configuration" "orderagreeting_private_launch_configuration
   name          = "${var.environment}-orderagreeting-private-lc"
   image_id      = var.ami
   instance_type = var.instance_type
-  iam_instance_profile = aws_iam_instance_profile.orderagreeting_ecs_instance_profile.name
+  iam_instance_profile = var.iam_instance_profile_name
 
   user_data = <<-EOF
               #!/bin/bash
@@ -66,9 +71,9 @@ resource "aws_autoscaling_group" "orderagreeting_private_autoscaling_group" {
   desired_capacity     = 3
 
   vpc_zone_identifier = [
-    aws_subnet.orderagreeting_private_subnet[0].id,
-    aws_subnet.orderagreeting_private_subnet[1].id,
-    aws_subnet.orderagreeting_private_subnet[2].id
+    var.private_subnet_ids[0],
+    var.private_subnet_ids[1],
+    var.private_subnet_ids[2]
   ]
 
   tag {
@@ -84,8 +89,8 @@ resource "aws_ecs_task_definition" "orderagreeting_frontend_task" {
   requires_compatibilities = ["EC2"]
   cpu                      = "256"
   memory                   = "512"
-  execution_role_arn       = aws_iam_role.orderagreeting_ecs_task_execution_role.arn
-  task_role_arn            = aws_iam_role.orderagreeting_ecs_task_role.arn
+  execution_role_arn       = var.ecs_task_execution_role_arn
+  task_role_arn            = var.ecs_task_role_arn
 
   container_definitions = jsonencode([
     {
@@ -101,8 +106,8 @@ resource "aws_ecs_task_definition" "orderagreeting_frontend_task" {
         }
       ]
       environment = [
-        { name = "DB_HOST", value = aws_rds_cluster.inventory_db.endpoint },
-        { name = "DB_NAME", value = aws_rds_cluster.inventory_db.database_name },
+        { name = "DB_HOST", value = var.inventory_db_endpoint },
+        { name = "DB_NAME", value = var.orders_db_endpoint },
         { name = "DB_USER", value = "postgres" },
         { name = "DB_PASSWORD", value = "postgres" },
         { name = "DB_PORT", value = "5432" },
@@ -111,7 +116,7 @@ resource "aws_ecs_task_definition" "orderagreeting_frontend_task" {
         { name = "PORT_INVENTORY", value = "5001"},
         { name = "FQDN_ORDERS", value = "orders.orderagreeting.svc.cluster.local"},
         { name = "PORT_ORDERS", value = "5002"},
-        { name = "FQDN_FRONTEND_EXTERNAL", value = "need_alb_dns_name"},
+        { name = "FQDN_FRONTEND_EXTERNAL", value = data.aws_lb.orderagreeting_frontend_load_balancer.dns_name }, 
         { name = "PORT_FRONTEND_EXTERNAL", value = "80"},
         { name = "PORT_FLASK_FRONTEND", value = "5000"}
       ]
@@ -126,8 +131,8 @@ resource "aws_ecs_task_definition" "orderagreeting_inventory_task" {
   requires_compatibilities = ["EC2"]
   cpu                      = "256"
   memory                   = "512"
-  execution_role_arn       = aws_iam_role.orderagreeting_ecs_task_execution_role.arn
-  task_role_arn            = aws_iam_role.orderagreeting_ecs_task_role.arn
+  execution_role_arn       = var.ecs_task_execution_role_arn
+  task_role_arn            = var.ecs_task_role_arn
 
   container_definitions = jsonencode([
     {
@@ -143,8 +148,8 @@ resource "aws_ecs_task_definition" "orderagreeting_inventory_task" {
         }
       ]
       environment = [
-        { name = "DB_HOST", value = aws_rds_cluster.inventory_db.endpoint },
-        { name = "DB_NAME", value = aws_rds_cluster.inventory_db.database_name },
+        { name = "DB_HOST", value = var.inventory_db_endpoint },
+        { name = "DB_NAME", value = var.orders_db_name },
         { name = "DB_USER", value = "postgres" },
         { name = "DB_PASSWORD", value = "postgres" },
         { name = "DB_PORT", value = "5432" },
@@ -160,8 +165,8 @@ resource "aws_ecs_task_definition" "orderagreeting_orders_task" {
   requires_compatibilities = ["EC2"]
   cpu                      = "256"
   memory                   = "512"
-  execution_role_arn       = aws_iam_role.orderagreeting_ecs_task_execution_role.arn
-  task_role_arn            = aws_iam_role.orderagreeting_ecs_task_role.arn
+  execution_role_arn       = var.ecs_task_execution_role_arn
+  task_role_arn            = var.ecs_task_role_arn
 
   container_definitions = jsonencode([
     {
@@ -177,8 +182,8 @@ resource "aws_ecs_task_definition" "orderagreeting_orders_task" {
         }
       ]
       environment = [
-        { name = "DB_HOST", value = aws_rds_cluster.orders_db.endpoint },
-        { name = "DB_NAME", value = aws_rds_cluster.orders_db.database_name },
+        { name = "DB_HOST", value = var.orders_db_endpoint },
+        { name = "DB_NAME", value = var.orders_db_name },
         { name = "DB_USER", value = "postgres" },
         { name = "DB_PASSWORD", value = "postgres" },
         { name = "DB_PORT", value = "5432" },
@@ -263,7 +268,7 @@ resource "aws_ecs_service" "orderagreeting_orders_service" {
 # Cloud Map Namespace
 resource "aws_service_discovery_private_dns_namespace" "orderagreeting_namespace" {
   name        = "${var.environment}-orderagreeting-namespace"
-  vpc         = aws_vpc.orderagreeting_vpc.id
+  vpc         = var.orderagreeting_vpc_id
   description  = "Namespace for orderagreeting services"
 
   tags = {

@@ -13,3 +13,19 @@ variable "public_subnet_cidrs" {
 variable "private_subnet_cidrs" {
   default = ["10.0.10.0/24", "10.0.11.0/24", "10.0.12.0/24"]
 }
+
+variable "ecs_ec2_instance_type" {
+  default = "t2.micro"
+}
+
+variable "ecs_ec2_ami" {
+  default = "ami-12345678"
+}
+
+variable "aurora_instance_class" {
+  default = "db.t2.small"
+}
+
+variable "availability_zones" {
+  default = ["us-east-1a", "us-east-1b", "us-east-1c"]
+}

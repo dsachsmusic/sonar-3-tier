@@ -27,10 +27,10 @@ variable "private_subnet_cidrs" {
 }
 
 variable "availability_zones" {
-  description = "List of availability zones for the subnets"
+  description = "List of availability zones"
   type        = list(string)
   validation {
-    condition     = length(var.availability_zones) <= length(data.aws_availability_zones.available.names)
-    error_message = "The number of availability zones provided exceeds the number of available AZs in the region."
+    condition     = length(var.availability_zones) == 3
+    error_message = "You must provide exactly three availability zones."
   }
 }
