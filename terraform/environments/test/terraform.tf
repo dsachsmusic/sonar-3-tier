@@ -1,5 +1,3 @@
-/*
-#this code goes in the folder where we call the modules?
 # Terraform configuration block
 terraform {
   #comment out because will use local state
@@ -30,4 +28,23 @@ provider "aws" {
   #AWS_ACCESS_KEY_ID     : inherently defined via PowerShell Environment variable.
   #AWS_SECRET_ACCESS_KEY : inherently defined via PowerShell environment varaible.
 }
-*/
+
+provider "postgresql" {
+  alias    = "inventory"
+  host     = aws_rds_cluster_instance.inventory_instance.endpoint
+  port     = 5432
+  username = "postgres"
+  password = "postgres"
+  database = "inventory"
+  sslmode  = "disable" # If you are not using SSL
+}
+
+provider "postgresql" {
+  alias    = "orders"
+  host     = aws_rds_cluster_instance.orders_instance.endpoint
+  port     = 5432
+  username = "postgres"
+  password = "postgres"
+  database = "orders"
+  sslmode  = "disable" # If you are not using SSL
+}

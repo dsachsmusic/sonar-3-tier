@@ -3,18 +3,20 @@ resource "aws_lb" "orderagreeting_frontend_load_balancer" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [var.frontend_lb_sg_id]
-  subnets            = aws_subnet.orderagreeting_public_subnet[*].id
+  subnets            = var.public_subnet_ids.*
 
   enable_deletion_protection = false
   idle_timeout              = 60
   enable_cross_zone_load_balancing = true #ensures traffic is distributed evenly  AZs.
 }
 
-resource "aws_lb_target_group" "orderagreeting_frontend_lb_target_group" {
-  name     = "${var.environment}-orderagreeting-frontend-lb-tg"
+resource "aws_lb_target_group" "orderagreeting_frontend_lb_tg" {
+  name     = "${var.environment}-orderagreeting-fe-lb-tg"
   port     = 5000
   protocol = "HTTP"
-  vpc_id   = var.orderagreeting_vpc_id
+  vpc_id   = var.vpc_id
+  
+  target_type = "ip"
 
   health_check {
     path                = "/" 
@@ -37,7 +39,7 @@ resource "aws_lb_listener" "orderagreeting_frontend_lb_listener" {
     type = "forward"
     forward {
       target_group {
-        arn = aws_lb_target_group.orderagreeting_frontend_lb_target_group.arn
+        arn = aws_lb_target_group.orderagreeting_frontend_lb_tg.arn
       }
     }
   }

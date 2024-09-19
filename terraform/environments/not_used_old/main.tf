@@ -33,6 +33,7 @@ module "alb" {
   orderagreeting_vpc_id = module.vpc.orderagreeting_vpc_id
   frontend_lb_sg_id                   = module.networking.frontend_lb_security_group_id
   db_subnet_group_name                = module.networking.orderagreeting_db_subnet_group_name
+  public_subnet_ids                   = module.vpc.orderagreeting_public_subnet_ids
   # ALB-specific variables
 }
 

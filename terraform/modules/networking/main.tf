@@ -2,7 +2,7 @@
 
 # Internet Gateway ...so public subnet can access the internet
 resource "aws_internet_gateway" "orderagreeting_igw" {
-  vpc_id = var.orderagreeting_vpc_id
+  vpc_id = var.vpc_id
 
   tags = {
     Name = "${var.environment}-orderagreeting-igw"
@@ -25,7 +25,7 @@ resource "aws_eip" "orderagreeting_nat_eip" {
 # ...all the outbound traffic goes through a single NAT gatway in a single AZ
 resource "aws_nat_gateway" "orderagreeting_nat_gateway" {
   allocation_id = aws_eip.orderagreeting_nat_eip.id
-  subnet_id     = var.public_subnet_ids[0].id  # Use any public subnet
+  subnet_id     = var.public_subnet_ids[0]  # Use any public subnet
 
   tags = {
     Name = "${var.environment}-orderagreeting-nat-gateway"
@@ -36,7 +36,7 @@ resource "aws_nat_gateway" "orderagreeting_nat_gateway" {
 # route table with default route traffic to the internet
 #for...public subnet...through internet gateway
 resource "aws_route_table" "orderagreeting_public_route_table" {
-  vpc_id = var.orderagreeting_vpc_id
+  vpc_id = var.vpc_id
 
   route {
     cidr_block = "0.0.0.0/0"
@@ -57,7 +57,7 @@ resource "aws_route_table_association" "orderagreeting_public_subnet_association
 # route table with default route traffic to the internet
 #for...public subnet...through internet gateway
 resource "aws_route_table" "orderagreeting_private_route_table" {
-  vpc_id = var.orderagreeting_vpc_id
+  vpc_id = var.vpc_id
 
   route {
     cidr_block = "0.0.0.0/0"
@@ -79,7 +79,7 @@ resource "aws_route_table_association" "orderagreeting_private_subnet_associatio
 resource "aws_security_group" "orderagreeting_frontend_lb_sg" {
   name        = "${var.environment}-orderagreeting-frontend-lb-sg"
   description = "Allow inbound traffic to the load balancer"
-  vpc_id = var.orderagreeting_vpc_id
+  vpc_id = var.vpc_id
 
   ingress {
     description = "Allow inbound HTTP traffic from the internet"
@@ -102,14 +102,15 @@ resource "aws_security_group" "orderagreeting_frontend_lb_sg" {
 resource "aws_security_group" "orderagreeting_frontend_sg" {
   name        = "${var.environment}-orderagreeting-frontend-sg"
   description = "Frontend service security group"
-  vpc_id = var.orderagreeting_vpc_id
+  vpc_id = var.vpc_id
 
   ingress {
     description = "Allow inbound traffic from the load balancer to the host port"
     from_port   = 5000
     to_port     = 5000
     protocol    = "tcp"
-    security_groups = [aws_security_group.orderagreeting_frontend_lb_sg.id]
+    cidr_blocks = ["0.0.0.0/0"] #shortcut, instead of security groups, to avoid cyclical dependencies
+    #security_groups = [aws_security_group.orderagreeting_frontend_lb_sg.id]
   }
 
   egress {
@@ -136,7 +137,7 @@ resource "aws_security_group" "orderagreeting_frontend_sg" {
 resource "aws_security_group" "orderagreeting_orders_sg" {
   name        = "${var.environment}-orderagreeting-orders-sg"
   description = "Orders service security group"
-  vpc_id = var.orderagreeting_vpc_id
+  vpc_id = var.vpc_id
 
   ingress {
     description = "Allow inbound traffic from frontend service"
@@ -160,7 +161,7 @@ resource "aws_security_group" "orderagreeting_orders_sg" {
 resource "aws_security_group" "orderagreeting_inventory_sg" {
   name        = "${var.environment}-orderagreeting-inventory-sg"
   description = "Inventory service security group"
-  vpc_id = var.orderagreeting_vpc_id
+  vpc_id = var.vpc_id
 
   ingress {
     description = "Allow inbound traffic from frontend and orders services"
@@ -188,7 +189,7 @@ resource "aws_security_group" "orderagreeting_inventory_sg" {
 resource "aws_security_group" "orderagreeting_aurora_sg" {
   name        = "${var.environment}-orderagreeting-aurora-sg"
   description = "Aurora DB security group"
-  vpc_id = var.orderagreeting_vpc_id
+  vpc_id = var.vpc_id
 
   ingress {
     description = "Allow inbound traffic from orders and inventory services"
@@ -205,8 +206,8 @@ resource "aws_security_group" "orderagreeting_aurora_sg" {
 }
 
 # Security Group for Service Discovery
-resource "aws_security_group" "service_discovery_sg" {
-  vpc_id = var.orderagreeting_vpc_id
+resource "aws_security_group" "orderagreeting_service_discovery_sg" {
+  vpc_id = var.vpc_id
 
   ingress {
     from_port   = 53

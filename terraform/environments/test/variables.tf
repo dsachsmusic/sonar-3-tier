@@ -2,6 +2,11 @@ variable "environment" {
   default = "dev"
 }
 
+variable "region" {
+  default = "us-east-1"
+}
+
+
 variable "vpc_cidr_block" {
   default = "10.0.0.0/16"
 }
@@ -19,11 +24,11 @@ variable "ecs_ec2_instance_type" {
 }
 
 variable "ecs_ec2_ami" {
-  default = "ami-12345678"
+  default = "ami-07ae7190a74b334a0"
 }
 
 variable "aurora_instance_class" {
-  default = "db.t2.small"
+  default = "db.r5.large"
 }
 
 variable "availability_zones" {

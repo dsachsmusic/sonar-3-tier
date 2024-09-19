@@ -3,7 +3,7 @@ variable "environment" {
   type        = string
 }
 
-variable "orderagreeting_general_purpose_bucket_arn" {
+variable "general_purpose_bucket_arn" {
   description = "ARN for the general purpose bucket"
   type        = string
 }

@@ -47,10 +47,15 @@ resource "aws_iam_role" "orderagreeting_ecs_task_role" {
 # Policy attachment that grants ECS tasks the permissions to interact with ECS service components 
 # ...The policy here, when attached to this role allows ECS operations, such as interacting...
 # with ECS services or accessing container instance metadata.
+
+# comment the following out?  because of an error with Terraform...not sure about how to fix
+
 resource "aws_iam_role_policy_attachment" "orderagreeting_ecs_task_role_policy_attachment" {
   role      = aws_iam_role.orderagreeting_ecs_task_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerServiceforEC2Role"
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
 }
+
+
 
 # Role that EC2 instances running ECS tasks will assume... will be attached to policies that
 # allow EC2 instances running ECS tasks to interact with ECS services and perform actions as needed.
@@ -62,6 +67,7 @@ resource "aws_iam_role" "orderagreeting_ecs_instance_role" {
     Statement = [
       {
         Effect = "Allow"
+        Sid = ""
         Principal = {
           Service = "ec2.amazonaws.com"
         }
@@ -83,6 +89,39 @@ resource "aws_iam_role_policy_attachment" "orderagreeting_ecs_instance_role_poli
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
 }
 
+#Policy allowing ECS service to manage tasks and communicate with other AWS services (like ALB, CloudMap, etc.).
+#...like, for ALB, permissions to register and deregister targets.
+#not sure if needed
+resource "aws_iam_policy" "orderagreeting_ecs_service_policy" {
+  name        = "${var.environment}-orderagreeting-ecs-service-policy"
+  description = "Policy allowing ECS services to interact with other AWS services"
+  policy      = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "elasticloadbalancing:RegisterTargets",
+          "elasticloadbalancing:DeregisterTargets",
+          "elasticloadbalancing:DescribeTargetHealth",
+          "ecs:DescribeServices",
+          "ecs:UpdateService",
+          "ecs:ListTasks",
+          "ecs:DescribeTasks",
+          "servicediscovery:DiscoverInstances",
+          "servicediscovery:UpdateInstanceCustomHealthStatus"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "orderagreeting_ecs_service_policy_attachment" {
+  role      = aws_iam_role.orderagreeting_ecs_instance_role.name  # or the role you use for the ECS service
+  policy_arn = aws_iam_policy.orderagreeting_ecs_service_policy.arn
+}
+
 # IAM user for executing commands on ECS tasks using the ECS Exec feature.
 resource "aws_iam_user" "orderagreeting_ecs_exec_user" {
   name = "${var.environment}-ecs-exec-user"
@@ -100,19 +139,6 @@ resource "aws_iam_user_policy_attachment" "orderagreeting_ecs_exec_user_policy" 
 resource "aws_iam_access_key" "orderagreeting_ecs_exec_user_key" {
   user = aws_iam_user.orderagreeting_ecs_exec_user.name
 }
-
-# Output the access key ID for the ECS Exec user
-# This output provides the access key ID for use in accessing AWS services programmatically.
-output "orderagreeting_ecs_exec_user_access_key_id" {
-  value = aws_iam_access_key.orderagreeting_ecs_exec_user_key.id
-}
-
-# Output the secret access key for the ECS Exec user
-# This output provides the secret access key for use in accessing AWS services programmatically.
-output "orderagreeting_ecs_exec_user_secret_access_key" {
-  value = aws_iam_access_key.orderagreeting_ecs_exec_user_key.secret
-}
-
 
 # Custom IAM policy for ECS Exec commands
 # This policy grants permissions to execute SSM commands, create log streams, 
@@ -176,7 +202,7 @@ resource "aws_iam_role_policy" "orderagreeting_ecs_task_execution_s3_bucket_poli
           "s3:GetObject",
           "s3:PutObject"
         ],
-        Resource = "${var.orderagreeting_general_purpose_bucket_arn}/*"
+        Resource = "${var.general_purpose_bucket_arn}/*"
       }
     ]
   })
@@ -196,7 +222,7 @@ resource "aws_iam_role_policy" "orderagreeting_ecs_task_role_s3_bucket_policy" {
           "s3:GetObject",
           "s3:PutObject"
         ],
-        Resource = "${var.orderagreeting_general_purpose_bucket_arn}/*"
+        Resource = "${var.general_purpose_bucket_arn}/*"
       }
     ]
   })

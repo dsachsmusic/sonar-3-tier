@@ -63,5 +63,39 @@ variable "private_subnet_ids" {
   type        = list(string)
 }
 
+variable "frontend_sg_id" {
+  description = "ID of the security group corresponding to the frontend"
+  type        = string
+}
 
+variable "frontend_load_balancer_dnsname" {
+  description = "DNS name for the frontend load balancer"
+  type        = string
+}
+
+variable "inventory_sg_id" {
+  description = "ID of the security group corresponding to the inventory service"
+  type        = string
+}
+
+variable "orders_sg_id" {
+  description = "ID of the security group corresponding to the orders service"
+  type        = string
+}
+
+variable "service_discovery_sg_id" {
+  description = "ID of the security group for service discovery"
+  type        = string
+}
+
+
+variable "ecs_service_policy_attachment_id" {
+  description = "ECS service policy attachment"
+  type        = string
+}
+
+variable "lb_target_group_arn" {
+  description = "ARN for the lb"
+  type        = string
+}
 

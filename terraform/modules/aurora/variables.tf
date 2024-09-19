@@ -8,7 +8,7 @@ variable "instance_class" {
   type        = string
 }
 
-variable "orderagreeting_aurora_sg_id" {
+variable "aurora_sg_id" {
   description = "Security group for Aurora to join"
   type        = string
 }
