@@ -51,6 +51,7 @@ resource "aws_rds_cluster" "inventory_db" {
   preferred_backup_window = "07:00-09:00"
   db_subnet_group_name    = var.db_subnet_group_name
   vpc_security_group_ids  = [var.aurora_sg_id]
+  skip_final_snapshot     = true
 }
 
 resource "aws_rds_cluster_instance" "inventory_instance" {
@@ -70,6 +71,7 @@ resource "aws_rds_cluster" "orders_db" {
   preferred_backup_window = "07:00-09:00"
   db_subnet_group_name    = var.db_subnet_group_name
   vpc_security_group_ids  = [var.aurora_sg_id]
+  skip_final_snapshot     = true
 }
 
 resource "aws_rds_cluster_instance" "orders_instance" {

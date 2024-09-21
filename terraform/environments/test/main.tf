@@ -38,15 +38,17 @@ module "alb" {
   public_subnet_ids    = module.vpc.orderagreeting_public_subnet_ids
   # ALB-specific variables
 }
-
-module "aurora" {
+ #### careful - this will cost a lot - specifically:
+ #"RDS db.r5.large Single-AZ instance hour (or partial hour) running Aurora PostgreSQL"
+ # uncomment to create anyway
+/*module "aurora" {
   source = "../../modules/aurora"
   environment                 = var.environment
   instance_class              = var.aurora_instance_class
   db_subnet_group_name        = module.networking.orderagreeting_db_subnet_group_name
   aurora_sg_id                = module.networking.orderagreeting_aurora_sg_id
 }
-
+*/
 module "ecs" {
   source = "../../modules/ecs"
   orderagreeting_vpc_id              = module.vpc.orderagreeting_vpc_id
